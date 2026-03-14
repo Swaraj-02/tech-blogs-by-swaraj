@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tech Blogs by Swaraj</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --accent2: #3fb950;
+      --tag-bg: #1f3a5f;
+      --tag-text: #79c0ff;
+      --hover: #1c2128;
+      --shadow: rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo svg { color: var(--accent); }
+    #search {
+      flex: 1;
+      max-width: 320px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--muted); }
+
+    /* ── Main layout ── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .stats-bar span { color: var(--text); font-weight: 600; }
+
+    /* ── Sort / filter ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .sort-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      padding: 5px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sort-btn:hover, .sort-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Blog card ── */
+    .blog-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 24px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.1s;
+      position: relative;
+    }
+    .blog-card:hover {
+      border-color: var(--accent);
+      background: var(--hover);
+      transform: translateY(-1px);
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .card-date {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+    .card-year-badge {
+      font-size: 11px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-weight: 600;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .card-slug {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-arrow {
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 18px;
+      pointer-events: none;
+      transition: color 0.2s, right 0.2s;
+    }
+    .blog-card:hover .card-arrow { color: var(--accent); right: 18px; }
+
+    /* ── Date group heading ── */
+    .date-group {
+      margin-top: 28px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .date-group::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Loading / error state ── */
+    .state-box {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--muted);
+    }
+    .state-box svg { margin-bottom: 16px; opacity: 0.5; }
+    .state-box h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+    .loader {
+      display: inline-block;
+      width: 28px; height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Viewer overlay ── */
+    #viewer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--bg);
+      flex-direction: column;
+    }
+    #viewer.open { display: flex; }
+
+    .viewer-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .back-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: var(--hover); border-color: var(--accent); color: var(--accent); }
+    .viewer-title {
+      font-size: 14px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .open-gh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .open-gh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .viewer-frame-wrap {
+      flex: 1;
+      overflow: hidden;
+    }
+    #blogFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #fff;
+    }
+    .viewer-loading {
+      position: absolute;
+      inset: 56px 0 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      z-index: 10;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .viewer-loading.hidden { display: none; }
+
+    /* ── No results ── */
+    #no-results {
+      display: none;
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    #no-results b { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .header-inner { height: auto; padding: 12px 0; flex-wrap: wrap; }
+      main { padding: 20px 16px 48px; }
+      .blog-card { padding: 16px; }
+      #search { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="javascript:void(0)" onclick="closeViewer()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+      Tech Blogs · Swaraj
+    </a>
+    <input id="search" type="search" placeholder="Search blogs…" oninput="filterBlogs()" />
+  </div>
+</header>
+
+<main id="main-view">
+  <div id="loading-state" class="state-box">
+    <div class="loader"></div>
+    <p>Fetching blogs from GitHub…</p>
+  </div>
+
+  <div id="error-state" class="state-box" style="display:none">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <h3>Could not load blogs</h3>
+    <p id="error-msg">Check your connection or GitHub API rate limit.</p>
+    <br/>
+    <button class="back-btn" onclick="loadBlogs()" style="margin:auto">Retry</button>
+  </div>
+
+  <div id="blog-list-container" style="display:none">
+    <div class="stats-bar">
+      <span id="blog-count">0</span> articles · auto-synced from GitHub
+    </div>
+    <div class="toolbar">
+      <button class="sort-btn active" onclick="setSortOrder('newest', this)">Newest first</button>
+      <button class="sort-btn" onclick="setSortOrder('oldest', this)">Oldest first</button>
+      <button class="sort-btn" onclick="setSortOrder('alpha', this)">A → Z</button>
+    </div>
+    <div id="no-results"><b>No results</b> for your search.</div>
+    <div id="blog-list"></div>
+  </div>
+</main>
+
+<!-- Viewer overlay -->
+<div id="viewer">
+  <div class="viewer-header">
+    <button class="back-btn" onclick="closeViewer()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </button>
+    <span class="viewer-title" id="viewer-title"></span>
+    <a class="open-gh-btn" id="open-gh-link" href="#" target="_blank" rel="noopener">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+      </svg>
+      View on GitHub
+    </a>
+  </div>
+  <div class="viewer-frame-wrap" style="position:relative">
+    <div class="viewer-loading" id="viewer-loading">
+      <div class="loader"></div>
+      <span>Loading article…</span>
+    </div>
+    <iframe id="blogFrame" sandbox="allow-same-origin allow-scripts" title="Blog post viewer"></iframe>
+  </div>
+</div>
+
+<script>
+  const REPO_OWNER = 'Swaraj-02';
+  const REPO_NAME  = 'tech-blogs-by-swaraj';
+  const BRANCH     = 'main';
+  const RAW_BASE   = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}`;
+  const GH_BASE    = `https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/${BRANCH}`;
+  const API_TREE   = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`;
+
+  let allBlogs = [];
+  let sortOrder = 'newest';
+
+  // ── Slug → Title ────────────────────────────────────────────────────────────
+function slugToTitle(slug) {
+  const acronyms = new Set([
+    'ai','api','sql','wal','sse','jwt','orm','sdk','cqrs','iot',
+    'ui','ux','url','http','https','id','db',
+    'js','ts','jsx','tsx',
+    'rn','ios','android',
+    'rest','graphql',
+    'ota','gps','nfc','ble',
+    'ci','cd','cdn',
+    'uuid','ws','tcp','udp'
+  ]);
+
+  return slug
+    .split('-')
+    .map(w => acronyms.has(w.toLowerCase())
+      ? w.toUpperCase()
+      : w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+  // ── Fetch all blog files from GitHub tree API ────────────────────────────────
+  async function loadBlogs() {
+    document.getElementById('loading-state').style.display = '';
+    document.getElementById('error-state').style.display = 'none';
+    document.getElementById('blog-list-container').style.display = 'none';
+
+    try {
+      const res = await fetch(API_TREE);
+      if (!res.ok) throw new Error(`GitHub API ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+
+      // Pattern: blog-YYYY/YYYY-MM-DD/slug.html
+      const blogPattern = /^blog-(\d{4})\/(\d{4}-\d{2}-\d{2})\/([^/]+)\.html$/;
+
+      allBlogs = data.tree
+        .filter(item => item.type === 'blob' && blogPattern.test(item.path))
+        .map(item => {
+          const [, year, date, slug] = blogPattern.exec(item.path);
+          return { path: item.path, year, date, slug, title: slugToTitle(slug) };
+        });
+
+      allBlogs.sort((a, b) => b.date.localeCompare(a.date)); // default: newest first
+
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('blog-count').textContent = allBlogs.length;
+      document.getElementById('blog-list-container').style.display = '';
+
+      renderBlogs(allBlogs);
+    } catch (err) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-msg').textContent = err.message;
+      document.getElementById('error-state').style.display = '';
+    }
+  }
+
+  // ── Render blog list ─────────────────────────────────────────────────────────
+  function renderBlogs(blogs) {
+    const container = document.getElementById('blog-list');
+    const noResults = document.getElementById('no-results');
+    container.innerHTML = '';
+
+    if (blogs.length === 0) {
+      noResults.style.display = '';
+      return;
+    }
+    noResults.style.display = 'none';
+
+    if (sortOrder === 'alpha') {
+      // Flat alphabetical list
+      blogs.forEach(blog => container.appendChild(makeCard(blog)));
+    } else {
+      // Group by date
+      const groups = {};
+      blogs.forEach(blog => {
+        if (!groups[blog.date]) groups[blog.date] = [];
+        groups[blog.date].push(blog);
+      });
+
+      Object.entries(groups).forEach(([date, posts]) => {
+        const heading = document.createElement('div');
+        heading.className = 'date-group';
+        heading.textContent = formatDate(date);
+        container.appendChild(heading);
+        posts.forEach(blog => container.appendChild(makeCard(blog)));
+      });
+    }
+  }
+
+  function makeCard(blog) {
+    const card = document.createElement('div');
+    card.className = 'blog-card';
+    card.setAttribute('data-path', blog.path);
+    card.setAttribute('data-title', blog.title.toLowerCase());
+    card.setAttribute('data-date', blog.date);
+    card.innerHTML = `
+      <div class="card-meta">
+        <span class="card-date">${blog.date}</span>
+        <span class="card-year-badge">${blog.year}</span>
+      </div>
+      <div class="card-title">${escapeHtml(blog.title)}</div>
+      <div class="card-slug">${blog.path}</div>
+      <span class="card-arrow">›</span>
+    `;
+    card.addEventListener('click', () => openBlog(blog));
+    return card;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Search ───────────────────────────────────────────────────────────────────
+  function filterBlogs() {
+    const query = document.getElementById('search').value.trim().toLowerCase();
+    if (!query) {
+      applySort(allBlogs);
+      return;
+    }
+    const filtered = allBlogs.filter(b =>
+      b.title.toLowerCase().includes(query) ||
+      b.slug.includes(query) ||
+      b.date.includes(query)
+    );
+    renderBlogs(filtered);
+  }
+
+  // ── Sort ─────────────────────────────────────────────────────────────────────
+  function setSortOrder(order, btn) {
+    sortOrder = order;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applySort(filtered());
+  }
+
+  function filtered() {
+    const query = document.getElementById('search').value.trim().toLowerCase();
+    if (!query) return allBlogs;
+    return allBlogs.filter(b =>
+      b.title.toLowerCase().includes(query) ||
+      b.slug.includes(query) ||
+      b.date.includes(query)
+    );
+  }
+
+  function applySort(blogs) {
+    let sorted = [...blogs];
+    if (sortOrder === 'newest') sorted.sort((a,b) => b.date.localeCompare(a.date));
+    else if (sortOrder === 'oldest') sorted.sort((a,b) => a.date.localeCompare(b.date));
+    else sorted.sort((a,b) => a.title.localeCompare(b.title));
+    renderBlogs(sorted);
+  }
+
+  // ── Viewer ───────────────────────────────────────────────────────────────────
+  async function openBlog(blog) {
+    const viewer = document.getElementById('viewer');
+    const frame  = document.getElementById('blogFrame');
+    const loading = document.getElementById('viewer-loading');
+
+    document.getElementById('viewer-title').textContent = blog.title;
+    document.getElementById('open-gh-link').href = `${GH_BASE}/${blog.path}`;
+    frame.srcdoc = '';
+    loading.classList.remove('hidden');
+    viewer.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    history.pushState({ blog: blog.path }, '', `#${encodeURIComponent(blog.path)}`);
+
+    try {
+      const res = await fetch(`${RAW_BASE}/${blog.path}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+      frame.srcdoc = html;
+      loading.classList.add('hidden');
+    } catch (err) {
+      frame.srcdoc = `<html><body style="font-family:sans-serif;padding:40px;color:#c00"><h2>Failed to load article</h2><p>${err.message}</p></body></html>`;
+      loading.classList.add('hidden');
+    }
+  }
+
+  function closeViewer() {
+    document.getElementById('viewer').classList.remove('open');
+    document.getElementById('blogFrame').srcdoc = '';
+    document.body.style.overflow = '';
+    if (history.state && history.state.blog) history.back();
+  }
+
+  // Handle browser back button
+  window.addEventListener('popstate', (e) => {
+    if (!e.state || !e.state.blog) closeViewerSilent();
+  });
+
+  function closeViewerSilent() {
+    document.getElementById('viewer').classList.remove('open');
+    document.getElementById('blogFrame').srcdoc = '';
+    document.body.style.overflow = '';
+  }
+
+  // Handle direct hash navigation (e.g. bookmarked post)
+  function checkHash() {
+    const hash = decodeURIComponent(location.hash.slice(1));
+    if (hash && hash.endsWith('.html')) {
+      const blog = allBlogs.find(b => b.path === hash);
+      if (blog) openBlog(blog);
+    }
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────────────────────
+  loadBlogs().then(checkHash);
+</script>
+</body>
+</html>
